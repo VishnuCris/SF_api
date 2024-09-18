@@ -1,0 +1,4 @@
+SF_api_venv
+SF_api/logs
+SF_api/config.py
+__pycache__*
