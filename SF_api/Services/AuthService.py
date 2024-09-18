@@ -133,7 +133,7 @@ class AuthService:
 
 				# access token generation
 				access_token = create_access_token(identity=verified_user.get('id'), expires_delta=timedelta(seconds=30))
-				refresh_token = create_refresh_token(identity=user.get('id'))
+				refresh_token = create_refresh_token(identity=verified_user.get('id'))
 				csrf_token = get_csrf_token(access_token)
 				response = self.HelperService.success_response({'message':'google authenticated','csrf_token':csrf_token,'refresh_token':refresh_token})
 				set_access_cookies(response, access_token)
