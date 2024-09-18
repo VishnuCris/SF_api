@@ -19,6 +19,7 @@ import base64
 import qrcode
 from io import BytesIO
 import os
+from datetime import datetime, timedelta
 
 class AuthService:
 	def __init__(self):
@@ -63,10 +64,12 @@ class AuthService:
 		if otp_validation:
 			user = self.authSql.check_user_exists(data)
 			if user:
-				access_token = create_access_token(identity=user.get('id'))
+				access_token = create_access_token(identity=user.get('id'), expires_delta=timedelta(seconds=30))
+				refresh_token = create_refresh_token(identity=user.get('id'))
 				csrf_token = get_csrf_token(access_token)
-				response = self.HelperService.success_response({'message':'Logged in succesfully','csrf_token':csrf_token})
+				response = self.HelperService.success_response({'message':'Logged in succesfully','csrf_token':csrf_token,'refresh_token':refresh_token})
 				set_access_cookies(response, access_token)
+				set_refresh_cookies(response,refresh_token)	
 				return response
 			return self.HelperService.error_response({'message':'wrong password'})
 		return self.HelperService.error_response({'message':'Invalid Otp'})
@@ -129,10 +132,12 @@ class AuthService:
 					os.remove(qr_code_path)
 
 				# access token generation
-				access_token = create_access_token(identity=verified_user.get('id'))
+				access_token = create_access_token(identity=verified_user.get('id'), expires_delta=timedelta(seconds=30))
+				refresh_token = create_refresh_token(identity=user.get('id'))
 				csrf_token = get_csrf_token(access_token)
-				response = self.HelperService.success_response({'message':'google authenticated','csrf_token':csrf_token})
+				response = self.HelperService.success_response({'message':'google authenticated','csrf_token':csrf_token,'refresh_token':refresh_token})
 				set_access_cookies(response, access_token)
+				set_refresh_cookies(response,refresh_token)
 				return response
 			else:
 				return self.HelperService.error_response({'message':'code not matched'})
@@ -163,9 +168,12 @@ class AuthService:
 			
 			''' token generation '''
 			user = self.authSql.get_user(data)
-			access_token = create_access_token(identity=user.get('id'))
-			response = self.HelperService.success_response({'msg':'Registered Succesfully','access_token':access_token})
+			access_token = create_access_token(identity=user.get('id'), expires_delta=timedelta(seconds=30))
+			refresh_token = create_refresh_token(identity=user.get('id'))
+			csrf_token = get_csrf_token(access_token)
+			response = self.HelperService.success_response({'msg':'Registered Succesfully','refresh_token':refresh_token,'csrf_token':csrf_token})
 			set_access_cookies(response, access_token)
+			set_refresh_cookies(response,refresh_token)
 			return response
 		except Exception as e:
 			self.DB.Rollback()
@@ -174,4 +182,12 @@ class AuthService:
 	def signout(self,data):
 		response = self.HelperService.success_response({'msg':'logged out successfully'	})
 		unset_jwt_cookies(response)
+		return response
+
+	def refresh(self,data):
+		current_user = get_jwt_identity()
+		access_token = create_access_token(identity=current_user, expires_delta=timedelta(seconds=30))
+		csrf_token = get_csrf_token(access_token)
+		response = self.HelperService.success_response({'msg':'Token refreshed Succesfully','csrf_token':csrf_token})
+		set_access_cookies(response, access_token)
 		return response

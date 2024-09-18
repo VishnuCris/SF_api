@@ -27,5 +27,8 @@ class AuthController:
 	def signout(self,data):
 		return self.authService.signout(data)
 
+	def refresh(self,data):
+		return self.authService.refresh(data)
+
 
 

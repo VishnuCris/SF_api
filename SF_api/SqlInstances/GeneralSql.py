@@ -10,6 +10,6 @@ class GeneralSql:
 			self.DB = DBService()
 
 	def generate_otp(self,data):
-		create_sql = """ insert into otps (customer_id,mobile_no,otp,email) values (%s,%s,%s,%s) """
+		create_sql = """ insert into otps (customer_id,mobile,otp,email) values (%s,%s,%s,%s) """
 		insert_data = (data.get('customer_id'),data.get('mobile'),data.get('otp'),data.get('email'))
 		self.DB.executeWithPrepared(create_sql,insert_data)

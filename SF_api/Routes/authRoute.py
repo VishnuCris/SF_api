@@ -54,6 +54,12 @@ def change_password():
     resp = authController.change_password(request.get_json())
     return resp
 
+@routes.route('auth/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    authController = AuthController()
+    resp = authController.refresh(request.get_json())
+    return resp
 
 @routes.post('/auth/signout')
 @jwt_required()
