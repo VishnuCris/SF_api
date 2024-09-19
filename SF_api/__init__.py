@@ -32,7 +32,8 @@ with app.app_context():
     # cors setup
     CORS(app, resources={
         r"/api/*": {
-            "origins": [app.config['UI_DOMAIN']],
+            # "origins": [app.config['UI_DOMAIN']],
+            "origins": '*',
             "methods": ["GET", "POST"],
             "headers": ["Content-Type"],
             "supports_credentials": True

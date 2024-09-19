@@ -64,7 +64,7 @@ class AuthService:
 		if otp_validation:
 			user = self.authSql.check_user_exists(data)
 			if user:
-				access_token = create_access_token(identity=user.get('id'), expires_delta=timedelta(seconds=30))
+				access_token = create_access_token(identity=user.get('id'), expires_delta=timedelta(days=2))
 				refresh_token = create_refresh_token(identity=user.get('id'))
 				csrf_token = get_csrf_token(access_token)
 				response = self.HelperService.success_response({'message':'Logged in succesfully','csrf_token':csrf_token,'refresh_token':refresh_token})
@@ -125,6 +125,7 @@ class AuthService:
 			#secret = verified_user.get('google_auth_secret')
 			secret = app.config['GOOGLE_AUTH_SECRET']
 			otp = pyotp.TOTP(secret)
+			print(data)
 			if otp.verify(data.get('google_otp')):
 				# remove qrcode file after verification
 				qr_code_path = f"{os.getcwd()}/{app.config['FLASK_APP_FOLDER']}/static/qrcodes/{verified_user['mobile']}.png"
@@ -132,7 +133,7 @@ class AuthService:
 					os.remove(qr_code_path)
 
 				# access token generation
-				access_token = create_access_token(identity=verified_user.get('id'), expires_delta=timedelta(seconds=30))
+				access_token = create_access_token(identity=verified_user.get('id'), expires_delta=timedelta(days=2))
 				refresh_token = create_refresh_token(identity=verified_user.get('id'))
 				csrf_token = get_csrf_token(access_token)
 				response = self.HelperService.success_response({'message':'google authenticated','csrf_token':csrf_token,'refresh_token':refresh_token})
@@ -168,7 +169,7 @@ class AuthService:
 			
 			''' token generation '''
 			user = self.authSql.get_user(data)
-			access_token = create_access_token(identity=user.get('id'), expires_delta=timedelta(seconds=30))
+			access_token = create_access_token(identity=user.get('id'), expires_delta=timedelta(days=2))
 			refresh_token = create_refresh_token(identity=user.get('id'))
 			csrf_token = get_csrf_token(access_token)
 			response = self.HelperService.success_response({'msg':'Registered Succesfully','refresh_token':refresh_token,'csrf_token':csrf_token})
@@ -186,7 +187,7 @@ class AuthService:
 
 	def refresh(self,data):
 		current_user = get_jwt_identity()
-		access_token = create_access_token(identity=current_user, expires_delta=timedelta(seconds=30))
+		access_token = create_access_token(identity=current_user, expires_delta=timedelta(days=2))
 		csrf_token = get_csrf_token(access_token)
 		response = self.HelperService.success_response({'msg':'Token refreshed Succesfully','csrf_token':csrf_token})
 		set_access_cookies(response, access_token)
